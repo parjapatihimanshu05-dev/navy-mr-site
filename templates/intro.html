@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>INDIAN NAVY MR</title>
+<style>
+body {
+    background:black;
+    color:#00ffcc;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    font-size:40px;
+    font-family:monospace;
+}
+</style>
+</head>
+<body>
+
+<div id="text"></div>
+
+<script>
+let txt = "INDIAN NAVY MR";
+let i = 0;
+
+function type(){
+    if(i < txt.length){
+        document.getElementById("text").innerHTML += txt.charAt(i);
+        i++;
+        setTimeout(type,150);
+    } else {
+        setTimeout(()=>{ window.location="/home"; },1500);
+    }
+}
+type();
+</script>
+
+</body>
+</html>

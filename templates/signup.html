@@ -1,15 +1,78 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Signup</title>
+    <title>Signup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            width: 350px;
+            text-align: center;
+        }
+        input[type=text], input[type=password] {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #5a67d8;
+        }
+        a {
+            display: block;
+            margin-top: 15px;
+            color: #764ba2;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .error {
+            color: red;
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 <body>
-<h2>Signup</h2>
-<form method="POST">
-    Username: <input type="text" name="username"><br><br>
-    Password: <input type="password" name="password"><br><br>
-    <button type="submit">Signup</button>
-</form>
-<a href="/login">Already have account? Login</a>
+    <div class="container">
+        <h2>Signup</h2>
+        
+
+<p style="font-size:14px;color:#555;">
+Start your INDIAN NAVY MR journey 🚀<br>
+Create account, practice daily and track your progress.
+</p>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+        <form method="POST">
+            <input type="text" name="username" placeholder="Username"><br>
+            <input type="password" name="password" placeholder="Password"><br>
+            <button type="submit">Signup</button>
+        </form>
+        <a href="/login">Already have an account? Login</a>
+    </div>
 </body>
 </html>

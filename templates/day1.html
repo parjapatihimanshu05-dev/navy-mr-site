@@ -5,469 +5,1142 @@
 <title>Agniveer Full Quiz</title>
 
 <style>
-body { font-family: Arial; background:#eef; padding:20px; }
-h1 { text-align:center; }
 
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 20px;
+
+    background: linear-gradient(-45deg, #667eea, #764ba2, #ff758c, #42e695);
+    background-size: 400% 400%;
+    animation: gradientBG 12s ease infinite;
+}
+
+/* 🌈 Background Animation */
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+h1 {
+    text-align: center;
+    color: white;
+    letter-spacing: 1px;
+}
+
+/* 🔴 Logout Button */
+#logout {
+    float: right;
+    margin: 10px;
+    padding: 10px 15px;
+    background: linear-gradient(45deg,#ff4b5c,#ff6b6b);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+#logout:hover {
+    transform: scale(1.05);
+}
+
+/* 📦 Quiz Container */
+#quiz {
+    max-width: 900px;
+    margin: 40px auto;
+}
+
+/* 💎 Glass Card */
 .question {
-    background:white;
-    padding:12px;
-    margin:10px;
-    border-radius:8px;
+    padding: 25px;
+    margin: 20px 0;
+    border-radius: 18px;
+
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+
+    color: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+
+    animation: fadeIn 0.5s ease;
 }
 
+/* ✨ Fade Animation */
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+/* 🎯 Options */
 .option {
-    padding:6px;
-    margin:5px;
-    border:1px solid #ccc;
-    cursor:pointer;
+    display: block;
+    padding: 14px;
+    margin: 10px 0;
+    border-radius: 10px;
+    cursor: pointer;
+
+    background: rgba(255,255,255,0.9);
+    color: black;
+
+    transition: all 0.25s ease;
 }
 
-.correct { background:lightgreen; }
-.wrong { background:salmon; }
+/* Hover Effect */
+.option:hover {
+    transform: translateX(5px);
+    background: #e9ecef;
+}
 
+/* Selected / Correct / Wrong */
+.correct {
+    background: #51cf66 !important;
+    color: white;
+}
+
+.wrong {
+    background: #ff6b6b !important;
+    color: white;
+}
+
+/* 🔘 Buttons */
+button {
+    padding: 10px 18px;
+    margin: 8px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+
+    background: linear-gradient(45deg,#4facfe,#00f2fe);
+    color: white;
+    font-weight: bold;
+
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+/* 📊 Score */
 #score {
-    text-align:center;
-    font-size:20px;
-    margin-top:20px;
+    text-align: center;
+    font-size: 24px;
+    margin-top: 20px;
+    color: white;
+    font-weight: bold;
 }
+
+/* 📱 Responsive */
+@media(max-width:600px){
+    .question { padding:15px; }
+    button { width:100%; }
+}
+
 </style>
 </head>
 
 <body>
 
-<h1>🇮🇳 Agniveer MR Full Quiz (Hindi + English)</h1>
+<h1>🇮🇳 Agniveer MR Full Quiz</h1>
+<div style="text-align:center; color:white; margin-bottom:20px;">
+    <b>🔥 Real Exam Mode</b> | Attempt all questions carefully
+</div>
 
+<form action="/logout">
+<button id="logout">Logout</button>
+</form>
+
+<div style="text-align:center;margin-bottom:10px;">
+    Go to Question: 
+    <input type="number" id="jump" min="1" max="180">
+    <button onclick="jumpTo()">Go</button>
+
+    <button onclick="finish()">Submit Quiz</button>
+</div>
+<div style="max-width:900px;margin:auto;">
+    <div style="background:#ccc;border-radius:10px;">
+        <div id="progress" style="height:10px;width:0%;background:#00f2fe;border-radius:10px;"></div>
+    </div>
+</div>
 <div id="quiz"></div>
 <div id="score"></div>
 
 <script>
 
-const questions = [
+const questions = [{q:`Q1. भारत की राजधानी क्या है?<br>What is the capital of India?`,options:["Mumbai","Delhi","Kolkata","Chennai"],answer:1},
+{q:`Q2. 2 + 2 = ?`,options:["3","4","5","6"],answer:1},
+{q:`Q3. पृथ्वी किसके चारों ओर घूमती है?`,options:["Moon","Sun","Mars","Venus"],answer:1},
+{q:`Q4. जल का सूत्र क्या है?`,options:["H2O","CO2","O2","H2"],answer:0},
+{q:`Q5. बल की इकाई?`,options:["Newton","Joule","Watt","Pascal"],answer:0},
 
-{q:`Q1. भारत की राजधानी क्या है?<br>What is the capital of India?`,options:["Mumbai","Delhi","Kolkata","Chennai"],answer:1},
-{q:`Q2. 2 + 2 = ?<br>2 + 2 = ?`,options:["3","4","5","6"],answer:1},
-{q:`Q3. पृथ्वी किसके चारों ओर घूमती है?<br>Earth revolves around?`,options:["Moon","Sun","Mars","Venus"],answer:1},
-{q:`Q4. जल का सूत्र क्या है?<br>Formula of water?`,options:["H2O","CO2","O2","H2"],answer:0},
-{q:`Q5. बल की इकाई क्या है?<br>Unit of force?`,options:["Newton","Joule","Watt","Pascal"],answer:0},
+{q:`Q6. सूर्य क्या है?`,options:["Planet","Star","Satellite","Comet"],answer:1},
+{q:`Q7. Heart chambers?`,options:["2","3","4","5"],answer:2},
+{q:`Q8. pH 7 indicates?`,options:["Acid","Base","Neutral","Salt"],answer:2},
+{q:`Q9. Speed of light?`,options:["3×10^8","10^6","10^5","10^7"],answer:0},
+{q:`Q10. Oxygen symbol?`,options:["O","Ox","Og","On"],answer:0},
 
-{q:`Q6. सूर्य क्या है?<br>What is Sun?`,options:["Planet","Star","Satellite","Comet"],answer:1},
-{q:`Q7. मानव हृदय में कितने कक्ष होते हैं?<br>Heart chambers?`,options:["2","3","4","5"],answer:2},
-{q:`Q8. pH 7 क्या दर्शाता है?<br>pH 7 indicates?`,options:["Acid","Base","Neutral","Salt"],answer:2},
-{q:`Q9. प्रकाश की गति क्या है?<br>Speed of light?`,options:["3×10^8","10^6","10^5","10^7"],answer:0},
-{q:`Q10. ऑक्सीजन का प्रतीक?<br>Symbol of oxygen?`,options:["O","Ox","Og","On"],answer:0},
+{q:`Q11. 5×5=?`,options:["20","25","30","15"],answer:1},
+{q:`Q12. Area of square?`,options:["a²","2a","a³","√a"],answer:0},
+{q:`Q13. 10% of 200?`,options:["10","20","30","40"],answer:1},
+{q:`Q14. sin 90°?`,options:["1","0","-1","½"],answer:0},
+{q:`Q15. cos 0°?`,options:["1","0","-1","½"],answer:0},
 
-{q:`Q11. 5×5=?<br>5×5=?`,options:["20","25","30","15"],answer:1},
-{q:`Q12. वर्ग का क्षेत्रफल?<br>Area of square?`,options:["a²","2a","a³","√a"],answer:0},
-{q:`Q13. 10% of 200?<br>10% of 200?`,options:["10","20","30","40"],answer:1},
-{q:`Q14. sin 90°?<br>sin 90°?`,options:["1","0","-1","½"],answer:0},
-{q:`Q15. cos 0°?<br>cos 0°?`,options:["1","0","-1","½"],answer:0},
+{q:`Q16. National animal?`,options:["Lion","Tiger","Cow","Elephant"],answer:1},
+{q:`Q17. Satellite of Earth?`,options:["Moon","Sun","Mars","Venus"],answer:0},
+{q:`Q18. Na is symbol of?`,options:["Sodium","Sulfur","Nitrogen","Neon"],answer:0},
+{q:`Q19. CO2 is?`,options:["Gas","Liquid","Solid","Metal"],answer:0},
+{q:`Q20. Plants make food by?`,options:["Photosynthesis","Respiration","Digestion","None"],answer:0},
 
-{q:`Q16. भारत का राष्ट्रीय पशु?<br>National animal?`,options:["Lion","Tiger","Cow","Elephant"],answer:1},
-{q:`Q17. पृथ्वी का उपग्रह?<br>Satellite of Earth?`,options:["Moon","Sun","Mars","Venus"],answer:0},
-{q:`Q18. Na किसका प्रतीक है?<br>Na is symbol of?`,options:["Sodium","Sulfur","Nitrogen","Neon"],answer:0},
-{q:`Q19. CO2 क्या है?<br>CO2 is?`,options:["Gas","Liquid","Solid","Metal"],answer:0},
-{q:`Q20. पौधे भोजन कैसे बनाते हैं?<br>Plants make food by?`,options:["Photosynthesis","Respiration","Digestion","None"],answer:0},
+{q:`Q21. सबसे लंबा महाकाव्य?<br>Longest epic`,options:["Gita","Ramayan","Gita Govinda","Mahabharat"],answer:3},
 
-{q:`Q21. 12/4=?<br>12/4=?`,options:["2","3","4","6"],answer:1},
-{q:`Q22. 7²=?<br>7²=?`,options:["49","14","21","28"],answer:0},
-{q:`Q23. त्रिभुज के कोणों का योग?<br>Sum of triangle angles?`,options:["180","90","360","270"],answer:0},
-{q:`Q24. वृत्त की परिधि?<br>Circumference?`,options:["2πr","πr²","r²","2r"],answer:0},
-{q:`Q25. tan 45°?<br>tan 45°?`,options:["1","0","√3","½"],answer:0},
+{q:`Q22. Derby किस खेल से जुड़ा है?<br>Derby related to`,options:["Polo","Swimming","Racing","Horse riding"],answer:3},
 
-{q:`Q26. रक्त का रंग?<br>Color of blood?`,options:["Red","Blue","Green","Yellow"],answer:0},
-{q:`Q27. विटामिन C स्रोत?<br>Vitamin C source?`,options:["Orange","Rice","Milk","Bread"],answer:0},
-{q:`Q28. लोहा की कमी?<br>Iron deficiency?`,options:["Anemia","Rickets","Scurvy","None"],answer:0},
-{q:`Q29. बिजली की इकाई?<br>Unit of current?`,options:["Ampere","Volt","Ohm","Watt"],answer:0},
-{q:`Q30. प्रतिरोध की इकाई?<br>Unit of resistance?`,options:["Ohm","Volt","Ampere","Watt"],answer:0},
+{q:`Q23. गीता सेठी किस खेल से जुड़ी है?<br>Geet Sethi`,options:["Basketball","Chess","Snooker","Tennis"],answer:2},
 
-{q:`Q31. 9×9=?<br>9×9=?`,options:["81","72","99","90"],answer:0},
-{q:`Q32. √16=?<br>√16=?`,options:["4","8","2","6"],answer:0},
-{q:`Q33. वर्गमूल?<br>Square root?`,options:["Root","Power","None","Sum"],answer:0},
-{q:`Q34. रेखाएं समानांतर?<br>Parallel lines?`,options:["Never meet","Meet","Cross","None"],answer:0},
-{q:`Q35. sin 30°?<br>sin 30°?`,options:["1/2","1","0","√3"],answer:0},
+{q:`Q24. पहला भारतीय ग्रैंडमास्टर?<br>First Indian GM`,options:["Anupama","Bhagyashree","Vishwanathan Anand","DV Prasad"],answer:2},
 
-{q:`Q36. सूर्य से सबसे पास ग्रह?<br>Closest planet?`,options:["Mercury","Venus","Earth","Mars"],answer:0},
-{q:`Q37. सबसे बड़ा ग्रह?<br>Largest planet?`,options:["Jupiter","Earth","Mars","Saturn"],answer:0},
-{q:`Q38. पानी का क्वथनांक?<br>Boiling point?`,options:["100°C","0°C","50°C","200°C"],answer:0},
-{q:`Q39. ठोस से द्रव?<br>Solid to liquid?`,options:["Melting","Freezing","Condensation","Evaporation"],answer:0},
-{q:`Q40. द्रव से गैस?<br>Liquid to gas?`,options:["Evaporation","Melting","Freezing","Condensation"],answer:0},
+{q:`Q25. पोलो खेल की उत्पत्ति भारत में कहाँ हुई?<br>Polo originated in`,options:["Manipur","Rajasthan","Gujarat","West Bengal"],answer:0},
 
-{q:`Q41. 15+5=?<br>15+5=?`,options:["20","25","30","15"],answer:0},
-{q:`Q42. 100/10=?<br>100/10=?`,options:["10","20","5","25"],answer:0},
-{q:`Q43. आयत का क्षेत्रफल?<br>Rectangle area?`,options:["l×b","l+b","2l","l²"],answer:0},
-{q:`Q44. sin²+cos²=?<br>Identity?`,options:["1","0","2","θ"],answer:0},
-{q:`Q45. sec θ=?<br>sec θ=?`,options:["1/cos","1/sin","tan","sin"],answer:0},
+// 🔥 Continued numbering properly
 
-{q:`Q46. श्वसन में गैस?<br>Breathing gas?`,options:["Oxygen","CO2","Nitrogen","Hydrogen"],answer:0},
-{q:`Q47. मस्तिष्क का भाग?<br>Brain part?`,options:["Cerebrum","Heart","Lung","Kidney"],answer:0},
-{q:`Q48. बैटरी क्या देती है?<br>Battery gives?`,options:["Energy","Light","Sound","Heat"],answer:0},
-{q:`Q49. दर्पण में प्रतिबिंब?<br>Reflection?`,options:["Equal angle","Random","None","Different"],answer:0},
-{q:`Q50. इंद्रधनुष क्यों बनता है?<br>Rainbow due to?`,options:["Refraction","Reflection","None","Diffraction"],answer:0},
-{
-q:`Q51. 10 आदमी एक दीवार को 8 दिन में बना सकते है। आधे दिन में कितने आदमी?<br>
-10 men can build a wall in 8 days. How many men are required to complete it in half day?`,
-options:["80","100","120","160"],
-answer:3
-},
+{q:`Q26. 15 × 4 = ?`,options:["40","50","60","70"],answer:2},
 
-{
-q:`Q52. 20% और 5% छूट पर खरीदी गई वस्तु (₹25000), ₹2000 मरम्मत, ₹25000 में बिक्री। लाभ/हानि %?<br>
-A dealer buys an article at ₹25000 with 20% and 5% discount, spends ₹2000 and sells at ₹25000. Gain/Loss %?`,
-options:["21% loss","10.5% loss","19.5% gain","25% gain"],
-answer:0
-},
+{q:`Q27. भारत का राष्ट्रीय पक्षी?`,options:["Crow","Peacock","Sparrow","Parrot"],answer:1},
 
-{
-q:`Q53. 1000kg चीनी, कुछ 8% लाभ पर, बाकी 18% पर। कुल लाभ 14%। 18% पर बिकी मात्रा?<br>
-A merchant sells part sugar at 8% and rest at 18%, overall 14% gain. Quantity at 18%?`,
-options:["500kg","600kg","400kg","640kg"],
-answer:1
-},
+{q:`Q28. पानी का रासायनिक सूत्र?`,options:["H2O","CO2","O2","NaCl"],answer:0},
 
-{
-q:`Q54. माध्य ज्ञात करें: 28,24,37,42,56,59,67,28,15,32<br>
-Find mean`,
-options:["23.5","38.8","42.3","71.2"],
-answer:1
-},
+{q:`Q29. 9² = ?`,options:["81","72","90","99"],answer:0},
 
-{
-q:`Q55. x² - 8x + 15 = 0 के मूल?<br>
-Roots of equation`,
-options:["2,3","3,5","8,15","6,5"],
-answer:1
-},
+{q:`Q30. पृथ्वी का उपग्रह?`,options:["Moon","Mars","Sun","Venus"],answer:0},
 
-{
-q:`Q56. समद्विबाहु त्रिभुज (3:4), क्षेत्रफल 18√5। तीसरी भुजा?<br>
-Isosceles triangle side ratio 3:4, area 18√5. Third side?`,
-options:["8√2","12","16","5√10"],
-answer:2
-},
+{q:`Q31. 100 ÷ 10 = ?`,options:["5","10","20","25"],answer:1},
 
-{
-q:`Q57. शंकु (r=7,h=24) की 5 टोपियों का क्षेत्रफल?<br>
-Area of sheet for 5 cones`,
-options:["5000","2750","3000","2700"],
-answer:1
-},
+{q:`Q32. सूर्य किस प्रकार का तारा है?`,options:["Red","White","Yellow","Blue"],answer:2},
 
-{
-q:`Q58. cos²x + sec²x का न्यूनतम मान?<br>
-Minimum value`,
-options:["0","1","2","3"],
-answer:2
-},
+{q:`Q33. भारत की मुद्रा?`,options:["Dollar","Rupee","Yen","Euro"],answer:1},
 
-{
-q:`Q59. 2 साड़ी + 4 शर्ट = 16000, 1 साड़ी = 6 शर्ट। 12 शर्ट की कीमत?<br>
-Cost of 12 shirts`,
-options:["12000","24000","48000","None"],
-answer:1
-},
+{q:`Q34. 7 × 8 = ?`,options:["54","56","64","72"],answer:1},
 
-{
-q:`Q60. k के लिए अनंत हल?<br>
-kx+3y-k+3=0 and 12x+ky=k`,
-options:["0","-6","6","1"],
-answer:2
-},
+{q:`Q35. रक्त का रंग?`,options:["Blue","Red","Green","Yellow"],answer:1},
 
-{
-q:`Q61. मान ज्ञात करें<br>
-Evaluate expression`,
-options:["16x+2y","16x²-y⁴","20x+y²","16x-4y"],
-answer:3
-},
+{q:`Q36. प्रकाश की गति?`,options:["3×10^8","10^6","10^5","10^7"],answer:0},
 
-{
-q:`Q62. यदि a²+b²=234, ab=108, तो (a+b)/(a-b)?`,
-options:["10","8","5","4"],
-answer:1
-},
+{q:`Q37. 5² = ?`,options:["10","20","25","30"],answer:2},
 
-{
-q:`Q63. Solve: 256 ÷ 17 × 3 + 180`,
-options:["51","73","271","272"],
-answer:3
-},
+{q:`Q38. भारत का राष्ट्रीय खेल?`,options:["Cricket","Hockey","Football","Kabaddi"],answer:1},
 
-{
-q:`Q64. सौर सेल में किसका प्रयोग नहीं होता?<br>
-Which can't be used in solar cell?`,
-options:["Silicon","Platinum","Gallium","Germanium"],
-answer:1
-},
+{q:`Q39. 20% of 100 = ?`,options:["10","20","30","40"],answer:1},
 
-{
-q:`Q65. ध्वनि की तीव्रता निर्भर करती है?<br>
-Loudness depends on`,
-options:["Wire","Amplitude","Area","All"],
-answer:3
-},
+{q:`Q40. ओजोन परत कहाँ है?`,options:["Troposphere","Stratosphere","Mesosphere","None"],answer:1},
 
-{
-q:`Q66. विद्युत आवेश की SI इकाई?<br>
-SI unit of charge`,
-options:["Volt","Ampere","Coulomb","Tesla"],
-answer:2
-},
+{q:`Q41. 12 × 12 = ?`,options:["124","144","132","122"],answer:1},
 
-{
-q:`Q67. Fructose → Ethanol enzyme?`,
-options:["Zymase","Invertase","Diastase","Fructose"],
-answer:0
-},
+{q:`Q42. सबसे छोटी संख्या?`,options:["0","1","-1","2"],answer:2},
 
-{
-q:`Q68. वेग का माप?<br>
-Measure of velocity`,
-options:["30 s","30 South","30 m/s","30 m/s South"],
-answer:3
-},
+{q:`Q43. CO2 क्या है?`,options:["Gas","Liquid","Solid","Metal"],answer:0},
 
-{
-q:`Q69. थर्मस हिलाने पर तापमान?<br>
-Thermos shaken`,
-options:["Increase","Decrease","Same","Can't say"],
-answer:0
-},
+{q:`Q44. 50 ÷ 5 = ?`,options:["5","10","15","20"],answer:1},
 
-{
-q:`Q70. क्या पृथ्वी चंद्रमा पर कार्य करती है?<br>
-Does Earth do work on Moon?`,
-options:["No","Yes sometimes","Yes always","Can't say"],
-answer:0
-},
+{q:`Q45. जल का क्वथनांक?`,options:["0°C","50°C","100°C","200°C"],answer:2},
 
-{
-q:`Q71. ऊपर जाने वाली वस्तु?<br>
-Upward motion`,
-options:["Accelerated","Constant","Oscillation","Retarded"],
-answer:3
-},
+{q:`Q46. भारत का राष्ट्रीय वृक्ष?`,options:["Neem","Peepal","Banyan","Mango"],answer:2},
 
-{
-q:`Q72. भार शून्य नहीं होगा?<br>
-Weight not zero`,
-options:["Earth centre","Free fall","Space","Frictionless surface"],
-answer:3
-},
+{q:`Q47. 3³ = ?`,options:["6","9","27","18"],answer:2},
 
-{
-q:`Q73. 10^19 इलेक्ट्रॉन हटाने पर आवेश?`,
-options:["10^19","+1.6","-1.6","10^-19"],
-answer:1
-},
+{q:`Q48. Oxygen का प्रतीक?`,options:["O","Ox","Og","On"],answer:0},
 
-{
-q:`Q74. क्वासार क्या है?<br>
-Quasar is`,
-options:["Neutron star","Black hole","White dwarf","Radio source"],
-answer:3
-},
+{q:`Q49. 11 × 11 = ?`,options:["111","121","131","141"],answer:1},
 
-{
-q:`Q75. ठोस → गैस?<br>
-Solid to gas`,
-options:["Sublimation","Evaporation","Diffusion","Condensation"],
-answer:0
-}
-,
+{q:`Q50. पृथ्वी का आकार?`,options:["Flat","Round","Square","Triangle"],answer:1},
 
-{
-q:`Q76. सबसे बड़ा ग्रह कौन सा है ?<br>Which is the biggest planet?`,
-options:["Venus","Mars","Mercury","Jupiter"],
-answer:3
-},
+{q:`Q51. भारत का राष्ट्रीय गान?`,options:["Vande Mataram","Jana Gana Mana","Saare Jahan Se","None"],answer:1},
 
-{
-q:`Q77. ऋग्वेद काल में किसकी पूजा होती थी?<br>Who was mainly worshipped in the Rig Veda period?`,
-options:["Indra","Vishnu","Surya","Trimurti"],
-answer:0
-},
+{q:`Q52. 6 × 7 = ?`,options:["36","42","48","54"],answer:1},
 
-{
-q:`Q78. एलोरा का महान स्थल किस देवता को समर्पित है?<br>Ellora monument is dedicated to?`,
-options:["Vishnu","Shiva","Ganesh","Krishna"],
-answer:1
-},
+{q:`Q53. Vitamin C स्रोत?`,options:["Milk","Rice","Orange","Bread"],answer:2},
 
-{
-q:`Q79. भारतीय राष्ट्रीय कांग्रेस की स्थापना कब हुई?<br>Year of INC formation`,
-options:["1835","1885","1901","1875"],
-answer:1
-},
+{q:`Q54. 18 ÷ 3 = ?`,options:["3","6","9","12"],answer:1},
 
-{
-q:`Q80. राष्ट्रीय राजमार्ग 4 जोड़ता है?<br>NH4 connects`,
-options:["Mumbai-Nagpur","Mumbai-Chennai","Nagpur-Hyderabad","Bangalore-Mysore"],
-answer:1
-},
+{q:`Q55. ध्वनि की गति?`,options:["330 m/s","150","100","500"],answer:0},
 
-{
-q:`Q81. पहली इलेक्ट्रिक ट्रेन (Deccan Queen) चली?<br>First electric train route`,
-options:["Mumbai-Surat","Howrah-Delhi","Kalyan-Pune","Delhi-Chennai"],
-answer:2
-},
+{q:`Q56. 8² = ?`,options:["64","72","80","90"],answer:0},
 
-{
-q:`Q82. ललित कला अकादमी का मुख्यालय?<br>Headquarters`,
-options:["New Delhi","Chandigarh","Pune","Kolkata"],
-answer:0
-},
+{q:`Q57. सूर्य से निकटतम ग्रह?`,options:["Mercury","Venus","Earth","Mars"],answer:0},
 
-{
-q:`Q83. सिंधु घाटी स्थल पाकिस्तान में?<br>Indus site in Pakistan`,
-options:["Harappa","Kalibangan","Lothal","Alamgir"],
-answer:0
-},
+{q:`Q58. 14 × 2 = ?`,options:["26","28","30","32"],answer:1},
 
-{
-q:`Q84. फिलिस्तीन विद्रोह क्या कहलाता है?<br>Palestinian uprising`,
-options:["Intifada","Hezbollah","PLO","Hamas"],
-answer:0
-},
+{q:`Q59. HCl क्या है?`,options:["Acid","Base","Salt","Metal"],answer:0},
 
-{
-q:`Q85. 'Runs and Ruins' किसने लिखी?<br>Author`,
-options:["Kapil Dev","Imran Khan","Sunil Gavaskar","None"],
-answer:1
-},
+{q:`Q60. 25 ÷ 5 = ?`,options:["3","4","5","6"],answer:2},
+{q:`Q61. If 2x + 3y = 13 and x - y = 1, find x`,options:["2","3","4","5"],answer:1},
+{q:`Q62. SI unit of pressure?`,options:["Pascal","Newton","Joule","Watt"],answer:0},
+{q:`Q63. First Governor General of India?`,options:["Curzon","Warren Hastings","Dalhousie","Cornwallis"],answer:1},
 
-{
-q:`Q86. मधुमेह किसकी कमी से होता है?<br>Diabetes caused by lack of`,
-options:["Sugar","Insulin","Calcium","Vitamins"],
-answer:1
-},
+{q:`Q64. Value of sin²θ + cos²θ?`,options:["0","1","2","θ"],answer:1},
+{q:`Q65. Speed of sound depends on?`,options:["Density","Temperature","Pressure","All"],answer:3},
+{q:`Q66. Capital of Kazakhstan?`,options:["Astana","Tashkent","Baku","Tehran"],answer:0},
 
-{
-q:`Q87. 'Land of Midnight Sun' कौन सा देश?<br>Country`,
-options:["Japan","Sweden","Norway","Denmark"],
-answer:2
-},
+{q:`Q67. Roots of x² - 5x + 6 = 0`,options:["2,3","1,6","-2,-3","3,5"],answer:0},
+{q:`Q68. Unit of electric charge?`,options:["Volt","Ampere","Coulomb","Ohm"],answer:2},
+{q:`Q69. Who wrote Constitution of India?`,options:["Nehru","Ambedkar","Gandhi","Rajendra Prasad"],answer:1},
 
-{
-q:`Q88. अक्रिय गैस की खोज?<br>Inert gas discovery`,
-options:["Priestley","Lavoisier","Cavendish","Ramsay"],
-answer:3
-},
+{q:`Q70. If log10 = 1, log100 = ?`,options:["1","2","10","100"],answer:1},
+{q:`Q71. Which gas causes greenhouse effect?`,options:["O2","CO2","N2","H2"],answer:1},
+{q:`Q72. Longest river in world?`,options:["Amazon","Nile","Ganga","Yangtze"],answer:1},
 
-{
-q:`Q89. इलेक्ट्रिक आयरन का तत्व?<br>Heating element`,
-options:["Nichrome","Tungsten","Copper","Iron"],
-answer:0
-},
+{q:`Q73. Area of circle = ?`,options:["πr²","2πr","r²","πd"],answer:0},
+{q:`Q74. SI unit of power?`,options:["Watt","Joule","Newton","Volt"],answer:0},
+{q:`Q75. Currency of Japan?`,options:["Dollar","Euro","Yen","Won"],answer:2},
 
-{
-q:`Q90. मणिपुर की राजधानी?<br>Capital`,
-options:["Shillong","Imphal","Gangtok","Kohima"],
-answer:1
-},
+{q:`Q76. If x² = 49, x = ?`,options:["±7","7","-7","0"],answer:0},
+{q:`Q77. Which vitamin for blood clotting?`,options:["A","B","K","D"],answer:2},
+{q:`Q78. Who discovered gravity?`,options:["Newton","Einstein","Galileo","Tesla"],answer:0},
 
-{
-q:`Q91. अंडमान-निकोबार की राजधानी?<br>Capital`,
-options:["Havelock","Jollyboy","Port Blair","Ross"],
-answer:2
-},
+{q:`Q79. Value of tan45°?`,options:["0","1","√3","-1"],answer:1},
+{q:`Q80. Which part of plant makes food?`,options:["Root","Leaf","Stem","Flower"],answer:1},
+{q:`Q81. Largest desert?`,options:["Sahara","Gobi","Thar","Kalahari"],answer:0},
 
-{
-q:`Q92. FAO का पूरा नाम?<br>FAO stands for`,
-options:["Food and Agriculture Organisation","Fruits Agro Org","Fruit Agriculture Ocean","Fruits Agro Ocean"],
-answer:0
-},
+{q:`Q82. 12² = ?`,options:["124","144","132","122"],answer:1},
+{q:`Q83. Human heart chambers?`,options:["2","3","4","5"],answer:2},
+{q:`Q84. National animal of India?`,options:["Lion","Tiger","Elephant","Cow"],answer:1},
 
-{
-q:`Q93. तेनजिंग नोर्गे किस क्षेत्र में प्रसिद्ध?<br>Tenzing Norgay`,
-options:["Boxing","Cycling","Mountaineering","Hockey"],
-answer:2
-},
+{q:`Q85. √144 = ?`,options:["10","11","12","13"],answer:2},
+{q:`Q86. Speed of light?`,options:["3×10^8","10^6","10^5","10^7"],answer:0},
+{q:`Q87. Capital of Australia?`,options:["Sydney","Melbourne","Canberra","Perth"],answer:2},
 
-{
-q:`Q94. 'Fuehrer' किसे कहा जाता है?<br>Who is Fuehrer`,
-options:["Stalin","Lenin","Hitler","Bismarck"],
-answer:2
-},
+{q:`Q88. If a=2, b=3 → a²+b²=?`,options:["13","12","10","9"],answer:0},
+{q:`Q89. Which metal is liquid?`,options:["Iron","Mercury","Copper","Gold"],answer:1},
+{q:`Q90. UNO formed in?`,options:["1945","1947","1939","1950"],answer:0},
 
-{
-q:`Q95. भारत का सबसे बड़ा संग्रहालय?<br>Largest museum`,
-options:["Andhra","UP","West Bengal","Delhi"],
-answer:2
-},
+{q:`Q91. 15×15=?`,options:["225","215","205","235"],answer:0},
+{q:`Q92. SI unit of force?`,options:["Newton","Joule","Watt","Pascal"],answer:0},
+{q:`Q93. Largest ocean?`,options:["Atlantic","Indian","Pacific","Arctic"],answer:2},
 
-{
-q:`Q96. सबसे लंबा महाकाव्य?<br>Longest epic`,
-options:["Gita","Ramayan","Gita Govinda","Mahabharat"],
-answer:3
-},
+{q:`Q94. If x=3 → x³=?`,options:["9","27","18","12"],answer:1},
+{q:`Q95. Which organ purifies blood?`,options:["Heart","Liver","Kidney","Lung"],answer:2},
+{q:`Q96. First Prime Minister of India?`,options:["Gandhi","Nehru","Patel","Rajendra"],answer:1},
 
-{
-q:`Q97. Derby किस खेल से जुड़ा है?<br>Derby related to`,
-options:["Polo","Swimming","Racing","Horse riding"],
-answer:3
-},
+{q:`Q97. 18÷3=?`,options:["3","6","9","12"],answer:1},
+{q:`Q98. Which gas used in balloons?`,options:["Oxygen","Hydrogen","Helium","Nitrogen"],answer:2},
+{q:`Q99. Capital of Canada?`,options:["Toronto","Ottawa","Vancouver","Montreal"],answer:1},
 
-{
-q:`Q98. गीता सेठी किस खेल से जुड़ी है?<br>Geet Sethi`,
-options:["Basketball","Chess","Snooker","Tennis"],
-answer:2
-},
+{q:`Q100. 7²=?`,options:["49","42","56","64"],answer:0},
+{q:`Q101. Boiling point of water?`,options:["100°C","0°C","50°C","200°C"],answer:0},
+{q:`Q102. Largest continent?`,options:["Asia","Africa","Europe","Australia"],answer:0},
 
-{
-q:`Q99. पहला भारतीय ग्रैंडमास्टर?<br>First Indian GM`,
-options:["Anupama","Bhagyashree","Vishwanathan Anand","DV Prasad"],
-answer:2
-},
+{q:`Q103. 20×5=?`,options:["100","90","80","120"],answer:0},
+{q:`Q104. Blood group universal donor?`,options:["A","B","O","AB"],answer:2},
+{q:`Q105. Currency of UK?`,options:["Euro","Dollar","Pound","Yen"],answer:2},
 
-{
-q:`Q100. पोलो खेल की उत्पत्ति भारत में कहाँ हुई?<br>Polo originated in`,
-options:["Manipur","Rajasthan","Gujarat","West Bengal"],
-answer:0
-}
+{q:`Q106. √81=?`,options:["7","8","9","10"],answer:2},
+{q:`Q107. Which planet has rings?`,options:["Earth","Mars","Saturn","Venus"],answer:2},
+{q:`Q108. Who invented bulb?`,options:["Newton","Edison","Tesla","Faraday"],answer:1},
+
+{q:`Q109. 9×8=?`,options:["72","81","64","56"],answer:0},
+{q:`Q110. SI unit of temperature?`,options:["Kelvin","Celsius","Fahrenheit","Joule"],answer:0},
+{q:`Q111. National bird of India?`,options:["Peacock","Crow","Parrot","Sparrow"],answer:0},
+
+{q:`Q112. 11×11=?`,options:["111","121","131","141"],answer:1},
+{q:`Q113. Which vitamin from sunlight?`,options:["A","B","C","D"],answer:3},
+{q:`Q114. Capital of Russia?`,options:["Moscow","Kyiv","Berlin","Paris"],answer:0},
+
+{q:`Q115. 50÷5=?`,options:["5","10","15","20"],answer:1},
+{q:`Q116. Which gas we breathe?`,options:["Oxygen","CO2","Hydrogen","Helium"],answer:0},
+{q:`Q117. Largest country?`,options:["USA","China","Russia","India"],answer:2},
+
+{q:`Q118. 6³=?`,options:["216","36","108","96"],answer:0},
+{q:`Q119. Unit of resistance?`,options:["Volt","Ohm","Ampere","Watt"],answer:1},
+{q:`Q120. National flower of India?`,options:["Rose","Lotus","Lily","Sunflower"],answer:1},
+{q:`Q121. Solve: 2x + 5 = 15`,options:["5","10","3","7"],answer:0},
+{q:`Q122. SI unit of frequency?`,options:["Hertz","Newton","Joule","Watt"],answer:0},
+{q:`Q123. Capital of Brazil?`,options:["Rio","Brasilia","Sao Paulo","Lima"],answer:1},
+
+{q:`Q124. If x²=81, x=?`,options:["9","-9","±9","0"],answer:2},
+{q:`Q125. Which gas is most abundant in air?`,options:["Oxygen","Nitrogen","CO2","Hydrogen"],answer:1},
+{q:`Q126. Who is known as Father of Nation (India)?`,options:["Nehru","Gandhi","Patel","Bose"],answer:1},
+
+{q:`Q127. 25×4=?`,options:["80","90","100","110"],answer:2},
+{q:`Q128. Unit of work?`,options:["Joule","Watt","Newton","Volt"],answer:0},
+{q:`Q129. Capital of Germany?`,options:["Berlin","Paris","Rome","Madrid"],answer:0},
+
+{q:`Q130. √169=?`,options:["11","12","13","14"],answer:2},
+{q:`Q131. Which organ pumps blood?`,options:["Liver","Heart","Kidney","Lung"],answer:1},
+{q:`Q132. Largest lake?`,options:["Caspian","Superior","Victoria","Baikal"],answer:0},
+
+{q:`Q133. 18×6=?`,options:["108","96","112","120"],answer:0},
+{q:`Q134. Unit of energy?`,options:["Joule","Watt","Volt","Ampere"],answer:0},
+{q:`Q135. Currency of China?`,options:["Yuan","Dollar","Euro","Won"],answer:0},
+
+{q:`Q136. If a=5 → a³=?`,options:["125","25","75","100"],answer:0},
+{q:`Q137. Which gas is used in photosynthesis?`,options:["O2","CO2","N2","H2"],answer:1},
+{q:`Q138. First President of India?`,options:["Nehru","Rajendra Prasad","Gandhi","Patel"],answer:1},
+
+{q:`Q139. 45÷9=?`,options:["3","4","5","6"],answer:2},
+{q:`Q140. SI unit of current?`,options:["Volt","Ampere","Ohm","Watt"],answer:1},
+{q:`Q141. Largest island?`,options:["Greenland","Australia","Borneo","Madagascar"],answer:0},
+
+{q:`Q142. 13×13=?`,options:["169","144","156","182"],answer:0},
+{q:`Q143. Human brain part?`,options:["Cerebrum","Heart","Lung","Kidney"],answer:0},
+{q:`Q144. Capital of Egypt?`,options:["Cairo","Nairobi","Lagos","Tripoli"],answer:0},
+
+{q:`Q145. √196=?`,options:["12","13","14","15"],answer:2},
+{q:`Q146. Unit of resistance?`,options:["Volt","Ohm","Ampere","Watt"],answer:1},
+{q:`Q147. Largest country in area?`,options:["USA","China","Russia","India"],answer:2},
+
+{q:`Q148. 16×7=?`,options:["102","112","122","132"],answer:1},
+{q:`Q149. Which vitamin for bones?`,options:["A","B","C","D"],answer:3},
+{q:`Q150. Capital of Italy?`,options:["Rome","Paris","Madrid","Berlin"],answer:0},
+
+{q:`Q151. If x=4 → x²+2x=?`,options:["24","20","16","12"],answer:0},
+{q:`Q152. Which metal is best conductor?`,options:["Iron","Copper","Silver","Gold"],answer:2},
+{q:`Q153. Largest volcano?`,options:["Mauna Loa","Etna","Fuji","Vesuvius"],answer:0},
+
+{q:`Q154. 14×14=?`,options:["196","184","172","200"],answer:0},
+{q:`Q155. Unit of voltage?`,options:["Volt","Ampere","Ohm","Watt"],answer:0},
+{q:`Q156. Capital of Spain?`,options:["Madrid","Barcelona","Lisbon","Rome"],answer:0},
+
+{q:`Q157. √225=?`,options:["13","14","15","16"],answer:2},
+{q:`Q158. Which organ controls body?`,options:["Heart","Brain","Liver","Kidney"],answer:1},
+{q:`Q159. Largest mountain?`,options:["Everest","K2","Kanchenjunga","Makalu"],answer:0},
+
+{q:`Q160. 22×5=?`,options:["100","110","120","130"],answer:1},
+{q:`Q161. SI unit of time?`,options:["Second","Minute","Hour","Day"],answer:0},
+{q:`Q162. Capital of South Korea?`,options:["Seoul","Tokyo","Beijing","Bangkok"],answer:0},
+
+{q:`Q163. If x=6 → x³=?`,options:["216","36","72","108"],answer:0},
+{q:`Q164. Which gas supports burning?`,options:["Oxygen","CO2","Nitrogen","Hydrogen"],answer:0},
+{q:`Q165. Largest river in India?`,options:["Ganga","Yamuna","Brahmaputra","Godavari"],answer:0},
+
+{q:`Q166. 30÷5=?`,options:["5","6","7","8"],answer:1},
+{q:`Q167. Unit of density?`,options:["kg/m³","kg","m³","g"],answer:0},
+{q:`Q168. Capital of Nepal?`,options:["Kathmandu","Thimphu","Dhaka","Colombo"],answer:0},
+
+{q:`Q169. √256=?`,options:["14","15","16","17"],answer:2},
+{q:`Q170. Which part absorbs water in plant?`,options:["Root","Leaf","Stem","Flower"],answer:0},
+{q:`Q171. Largest plateau?`,options:["Tibetan","Deccan","Brazilian","Patagonian"],answer:0},
+
+{q:`Q172. 18×8=?`,options:["144","154","164","134"],answer:0},
+{q:`Q173. Unit of force?`,options:["Newton","Joule","Watt","Pascal"],answer:0},
+{q:`Q174. Capital of Argentina?`,options:["Buenos Aires","Lima","Bogota","Santiago"],answer:0},
+
+{q:`Q175. If x=2 → x⁴=?`,options:["16","8","4","2"],answer:0},
+{q:`Q176. Which blood cell fights disease?`,options:["RBC","WBC","Platelets","Plasma"],answer:1},
+{q:`Q177. Largest sea?`,options:["South China Sea","Arabian Sea","Mediterranean","Bering Sea"],answer:0},
+
+{q:`Q178. 9×12=?`,options:["108","96","112","120"],answer:0},
+{q:`Q179. SI unit of heat?`,options:["Joule","Calorie","Watt","Volt"],answer:0},
+{q:`Q180. Capital of Turkey?`,options:["Istanbul","Ankara","Izmir","Antalya"],answer:1},
+{q:`Q181. If x² + 1/x² = 7, find x⁴ + 1/x⁴`,options:["47","45","49","43"],answer:0},
+
+{q:`Q182. Which law states pressure is inversely proportional to volume?`,options:["Boyle's Law","Charles Law","Ohm Law","Hooke Law"],answer:0},
+
+{q:`Q183. Which country has highest gold reserves?`,options:["USA","India","China","Germany"],answer:0},
+
+{q:`Q184. Solve: 2x² - 7x + 3 = 0`,options:["3,1/2","1,3/2","-1,3","2,3"],answer:0},
+
+{q:`Q185. Unit of electric flux?`,options:["Weber","Newton","Coulomb","Volt"],answer:0},
+
+{q:`Q186. Who discovered neutron?`,options:["Chadwick","Rutherford","Bohr","Einstein"],answer:0},
+
+{q:`Q187. If tanθ = 3/4, find sinθ`,options:["3/5","4/5","5/3","5/4"],answer:0},
+
+{q:`Q188. SI unit of magnetic field?`,options:["Tesla","Weber","Henry","Ohm"],answer:0},
+
+{q:`Q189. Largest democracy in world?`,options:["India","USA","China","Russia"],answer:0},
+
+{q:`Q190. If log₂8 = x, find x`,options:["3","2","4","1"],answer:0},
+
+{q:`Q191. Which particle has no charge?`,options:["Neutron","Proton","Electron","Ion"],answer:0},
+
+{q:`Q192. Capital of Mongolia?`,options:["Ulaanbaatar","Astana","Tbilisi","Bishkek"],answer:0},
+
+{q:`Q193. Solve: x³ - 6x² + 11x - 6 = 0`,options:["1,2,3","2,3,4","1,3,5","2,4,6"],answer:0},
+
+{q:`Q194. Which law relates voltage and current?`,options:["Ohm's Law","Faraday Law","Newton Law","Boyle Law"],answer:0},
+
+{q:`Q195. Who wrote 'Discovery of India'?`,options:["Nehru","Gandhi","Tagore","Ambedkar"],answer:0},
+
+{q:`Q196. If secθ = 5/4, find cosθ`,options:["4/5","5/4","3/5","1/5"],answer:0},
+
+{q:`Q197. SI unit of capacitance?`,options:["Farad","Henry","Ohm","Volt"],answer:0},
+
+{q:`Q198. Largest freshwater lake?`,options:["Lake Superior","Caspian Sea","Victoria","Baikal"],answer:0},
+
+{q:`Q199. Solve: √(x+5)=3`,options:["4","5","3","2"],answer:0},
+
+{q:`Q200. Which wave needs medium?`,options:["Sound","Light","X-ray","Gamma"],answer:0},
+
+{q:`Q201. First Asian Nobel Prize winner?`,options:["Tagore","Raman","Amartya Sen","Kalam"],answer:0},
+
+{q:`Q202. If x + 1/x = 3, find x² + 1/x²`,options:["7","9","5","6"],answer:0},
+
+{q:`Q203. SI unit of inductance?`,options:["Henry","Farad","Volt","Ohm"],answer:0},
+
+{q:`Q204. Currency of Switzerland?`,options:["Franc","Euro","Dollar","Pound"],answer:0},
+
+{q:`Q205. Solve: 3x - 2 = 16`,options:["6","5","7","4"],answer:0},
+
+{q:`Q206. Speed of sound in air approx?`,options:["343 m/s","300","400","200"],answer:0},
+
+{q:`Q207. Largest island country?`,options:["Indonesia","Japan","UK","Philippines"],answer:0},
+
+{q:`Q208. If a²+b²=25 and ab=12 find a+b`,options:["7","5","9","6"],answer:0},
+
+{q:`Q209. Which gas used in welding?`,options:["Acetylene","Oxygen","Nitrogen","Hydrogen"],answer:0},
+
+{q:`Q210. Capital of Norway?`,options:["Oslo","Stockholm","Helsinki","Copenhagen"],answer:0},
+
+{q:`Q211. Solve: x²=121`,options:["±11","11","-11","0"],answer:0},
+
+{q:`Q212. Unit of power?`,options:["Watt","Joule","Volt","Newton"],answer:0},
+
+{q:`Q213. Largest desert in Asia?`,options:["Gobi","Thar","Arabian","Karakum"],answer:0},
+
+{q:`Q214. If tanθ =1 find θ`,options:["45°","30°","60°","90°"],answer:0},
+
+{q:`Q215. Which lens forms real image?`,options:["Convex","Concave","Plane","None"],answer:0},
+
+{q:`Q216. Capital of Finland?`,options:["Helsinki","Oslo","Stockholm","Reykjavik"],answer:0},
+
+{q:`Q217. Solve: 2x+5=15`,options:["5","4","6","3"],answer:0},
+
+{q:`Q218. Unit of resistance?`,options:["Ohm","Volt","Ampere","Watt"],answer:0},
+
+{q:`Q219. Largest volcano?`,options:["Mauna Loa","Etna","Fuji","Vesuvius"],answer:0},
+
+{q:`Q220. If cosθ=1/2 find θ`,options:["60°","30°","90°","45°"],answer:0},
+
+{q:`Q221. Which metal is best conductor?`,options:["Silver","Copper","Gold","Iron"],answer:0},
+
+{q:`Q222. Capital of Chile?`,options:["Santiago","Lima","Bogota","Quito"],answer:0},
+
+{q:`Q223. Solve: x²-9=0`,options:["±3","3","-3","0"],answer:0},
+
+{q:`Q224. SI unit of force?`,options:["Newton","Joule","Watt","Pascal"],answer:0},
+
+{q:`Q225. Largest ocean current?`,options:["Gulf Stream","Labrador","Kuroshio","Canary"],answer:0},
+
+{q:`Q226. If x=2 find x³`,options:["8","4","6","10"],answer:0},
+
+{q:`Q227. Which gas is noble gas?`,options:["Helium","Oxygen","Nitrogen","Hydrogen"],answer:0},
+
+{q:`Q228. Capital of Peru?`,options:["Lima","Quito","Bogota","Caracas"],answer:0},
+
+{q:`Q229. Solve: 5x=25`,options:["5","4","6","3"],answer:0},
+
+{q:`Q230. Unit of work?`,options:["Joule","Watt","Volt","Newton"],answer:0},
+{q:`Q231. If x + 1/x = 5, find x³ + 1/x³`,options:["110","115","120","125"],answer:0},
+
+{q:`Q232. Which law explains electromagnetic induction?`,options:["Faraday Law","Ohm Law","Newton Law","Boyle Law"],answer:0},
+
+{q:`Q233. Which country is largest producer of lithium?`,options:["Chile","India","China","USA"],answer:0},
+
+{q:`Q234. If roots of ax²+bx+c=0 are equal, condition?`,options:["b²=4ac","b²>4ac","b²<4ac","a=0"],answer:0},
+
+{q:`Q235. Unit of electric potential difference?`,options:["Volt","Ampere","Ohm","Coulomb"],answer:0},
+
+{q:`Q236. Who discovered electron?`,options:["J.J. Thomson","Rutherford","Bohr","Chadwick"],answer:0},
+
+{q:`Q237. If sinθ = 3/5, find cosθ`,options:["4/5","3/5","5/3","5/4"],answer:0},
+
+{q:`Q238. SI unit of work?`,options:["Joule","Watt","Newton","Pascal"],answer:0},
+
+{q:`Q239. Smallest continent?`,options:["Australia","Europe","Antarctica","Africa"],answer:0},
+
+{q:`Q240. If log₁₀(1000)=x, find x`,options:["3","2","1","4"],answer:0},
+
+{q:`Q241. If x² + y² = 25 and xy = 12, find x+y`,options:["7","5","6","8"],answer:0},
+
+{q:`Q242. Which mirror forms virtual erect image?`,options:["Plane","Concave","Convex","None"],answer:0},
+
+{q:`Q243. Capital of Iceland?`,options:["Reykjavik","Oslo","Helsinki","Stockholm"],answer:0},
+
+{q:`Q244. Solve: x² - 2x - 8 = 0`,options:["4,-2","2,-4","1,8","-1,8"],answer:0},
+
+{q:`Q245. Unit of frequency?`,options:["Hertz","Joule","Watt","Volt"],answer:0},
+
+{q:`Q246. Who discovered proton?`,options:["Rutherford","Bohr","Einstein","Thomson"],answer:0},
+
+{q:`Q247. If tanθ = √3, θ = ?`,options:["60°","30°","45°","90°"],answer:0},
+
+{q:`Q248. SI unit of pressure?`,options:["Pascal","Newton","Joule","Watt"],answer:0},
+
+{q:`Q249. Longest coastline country?`,options:["Canada","India","USA","Australia"],answer:0},
+
+{q:`Q250. If x² = 16, x = ?`,options:["±4","4","-4","0"],answer:0},
+
+{q:`Q251. If a+b=10 and ab=21 find a²+b²`,options:["58","52","60","50"],answer:0},
+
+{q:`Q252. Which wave has highest frequency?`,options:["Gamma","X-ray","UV","IR"],answer:0},
+
+{q:`Q253. Currency of South Korea?`,options:["Won","Yen","Dollar","Peso"],answer:0},
+
+{q:`Q254. Solve: 3x² - 12x + 9 = 0`,options:["1,3","2,3","3,4","1,2"],answer:0},
+
+{q:`Q255. Unit of energy?`,options:["Joule","Watt","Volt","Ampere"],answer:0},
+
+{q:`Q256. Which gas is used in fire extinguisher?`,options:["CO2","O2","N2","H2"],answer:0},
+
+{q:`Q257. Capital of Vietnam?`,options:["Hanoi","Bangkok","Manila","Jakarta"],answer:0},
+
+{q:`Q258. If cosθ = √3/2 find θ`,options:["30°","60°","45°","90°"],answer:0},
+
+{q:`Q259. Which metal reacts with water violently?`,options:["Sodium","Copper","Iron","Silver"],answer:0},
+
+{q:`Q260. Largest bay in world?`,options:["Bay of Bengal","Hudson Bay","Arabian Sea","Gulf"],answer:0},
+
+{q:`Q261. If x=3 find x⁴`,options:["81","27","64","72"],answer:0},
+
+{q:`Q262. Unit of current?`,options:["Ampere","Volt","Ohm","Watt"],answer:0},
+
+{q:`Q263. Capital of Poland?`,options:["Warsaw","Berlin","Prague","Budapest"],answer:0},
+
+{q:`Q264. Solve: 4x-5=11`,options:["4","3","5","2"],answer:0},
+
+{q:`Q265. Which gas supports combustion?`,options:["Oxygen","CO2","Nitrogen","Helium"],answer:0},
+
+{q:`Q266. Largest delta?`,options:["Sundarbans","Nile","Amazon","Mississippi"],answer:0},
+
+{q:`Q267. If tanθ=1, θ=?`,options:["45°","60°","30°","90°"],answer:0},
+
+{q:`Q268. SI unit of magnetic flux?`,options:["Weber","Tesla","Henry","Volt"],answer:0},
+
+{q:`Q269. Capital of Sweden?`,options:["Stockholm","Oslo","Helsinki","Copenhagen"],answer:0},
+
+{q:`Q270. Solve: x²-4x+4=0`,options:["2,2","-2,-2","2,-2","4,0"],answer:0},
+
+{q:`Q271. If x+1/x=2 find x²+1/x²`,options:["2","4","0","1"],answer:0},
+
+{q:`Q272. Which gas causes acid rain?`,options:["SO2","O2","CO2","N2"],answer:0},
+
+{q:`Q273. Capital of Hungary?`,options:["Budapest","Vienna","Prague","Warsaw"],answer:0},
+
+{q:`Q274. If sinθ=1 find θ`,options:["90°","60°","30°","45°"],answer:0},
+
+{q:`Q275. SI unit of temperature?`,options:["Kelvin","Celsius","Fahrenheit","Joule"],answer:0},
+
+{q:`Q276. Largest coral reef?`,options:["Great Barrier Reef","Red Sea","Maldives","Hawaii"],answer:0},
+
+{q:`Q277. Solve: x³=27`,options:["3","9","6","12"],answer:0},
+
+{q:`Q278. Which metal is least reactive?`,options:["Gold","Iron","Zinc","Sodium"],answer:0},
+
+{q:`Q279. Capital of Denmark?`,options:["Copenhagen","Oslo","Stockholm","Helsinki"],answer:0},
+
+{q:`Q280. If cosθ=0 find θ`,options:["90°","60°","30°","45°"],answer:0},
+
+{q:`Q281. If a+b=5 and ab=6 find a²+b²`,options:["13","11","12","10"],answer:0},
+
+{q:`Q282. Unit of resistance?`,options:["Ohm","Volt","Ampere","Watt"],answer:0},
+
+{q:`Q283. Largest gulf?`,options:["Gulf of Mexico","Persian Gulf","Gulf of Aden","Gulf of Alaska"],answer:0},
+
+{q:`Q284. Solve: 2x²=50`,options:["±5","5","-5","0"],answer:0},
+
+{q:`Q285. Which gas is used in balloons?`,options:["Helium","Hydrogen","Oxygen","Nitrogen"],answer:0},
+
+{q:`Q286. Capital of Thailand?`,options:["Bangkok","Hanoi","Manila","Jakarta"],answer:0},
+
+{q:`Q287. If tanθ=0 find θ`,options:["0°","45°","90°","30°"],answer:0},
+
+{q:`Q288. SI unit of power?`,options:["Watt","Joule","Volt","Ampere"],answer:0},
+
+{q:`Q289. Largest peninsula?`,options:["Arabian","Indian","Scandinavian","Iberian"],answer:0},
+
+{q:`Q290. Solve: x²+2x+1=0`,options:["-1,-1","1,1","-1,1","0,1"],answer:0},
+{q:`Q291. If x + 1/x = 4, find x⁴ + 1/x⁴`,options:["194","198","192","200"],answer:0},
+
+{q:`Q292. Assertion: Light travels faster in vacuum than in medium. Reason: Medium offers resistance to light.`,options:["Both true & reason correct","Both true but reason wrong","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q293. Which country has no capital city?`,options:["Nauru","Monaco","Vatican","San Marino"],answer:0},
+
+{q:`Q294. If a,b are roots of x²-5x+6=0, find a³+b³`,options:["35","36","30","40"],answer:0},
+
+{q:`Q295. Unit of electric field?`,options:["N/C","Volt","Ohm","Ampere"],answer:0},
+
+{q:`Q296. Assertion: Metals are good conductors. Reason: They have free electrons.`,options:["Both true & reason correct","Both true but reason wrong","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q297. If sinθ + cosθ = √2, then θ = ?`,options:["45°","30°","60°","90°"],answer:0},
+
+{q:`Q298. Which radiation has highest penetration power?`,options:["Gamma","Alpha","Beta","UV"],answer:0},
+
+{q:`Q299. Largest inland sea?`,options:["Caspian Sea","Black Sea","Baltic Sea","Dead Sea"],answer:0},
+
+{q:`Q300. If x² + y² = 13 and xy = 6, find x+y`,options:["5","7","6","4"],answer:0},
+
+{q:`Q301. Solve: |x-3| = 5`,options:["8,-2","5,-5","3,-3","2,-8"],answer:0},
+
+{q:`Q302. Assertion: Current flows from + to -. Reason: Electrons move from - to +.`,options:["Both true & reason correct","Both true but reason wrong","Assertion true, reason false","Both false"],answer:1},
+
+{q:`Q303. Which country shares longest border with India?`,options:["Bangladesh","China","Pakistan","Nepal"],answer:0},
+
+{q:`Q304. If a+b+c=0, find a³+b³+c³`,options:["3abc","0","abc","-3abc"],answer:0},
+
+{q:`Q305. SI unit of charge?`,options:["Coulomb","Ampere","Volt","Ohm"],answer:0},
+
+{q:`Q306. Assertion: Sound cannot travel in vacuum. Reason: Sound is mechanical wave.`,options:["Both true & reason correct","Both true but reason wrong","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q307. If tanθ + cotθ = 2, θ = ?`,options:["45°","30°","60°","90°"],answer:0},
+
+{q:`Q308. Which element has highest electronegativity?`,options:["Fluorine","Oxygen","Chlorine","Nitrogen"],answer:0},
+
+{q:`Q309. Capital of Bolivia?`,options:["Sucre","La Paz","Lima","Bogota"],answer:0},
+
+{q:`Q310. If x=2+√3 find 1/x`,options:["2-√3","2+√3","√3-2","3-2√3"],answer:0},
+
+{q:`Q311. Solve: x²-7x+10=0`,options:["5,2","3,4","2,7","1,10"],answer:0},
+
+{q:`Q312. Assertion: Work done is zero in circular motion. Reason: Force is perpendicular to displacement.`,options:["Both true & reason correct","Both true but reason wrong","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q313. Largest freshwater river?`,options:["Amazon","Nile","Ganga","Yangtze"],answer:0},
+
+{q:`Q314. If logₐb × log_ba = ?`,options:["1","0","a","b"],answer:0},
+
+{q:`Q315. Unit of magnetic field?`,options:["Tesla","Weber","Henry","Ohm"],answer:0},
+
+{q:`Q316. Assertion: Ice floats on water. Reason: Density of ice < water.`,options:["Both true & reason correct","Both true but reason wrong","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q317. If sinθ=cosθ, θ=?`,options:["45°","30°","60°","90°"],answer:0},
+
+{q:`Q318. Which gas is greenhouse gas?`,options:["CO2","O2","N2","H2"],answer:0},
+
+{q:`Q319. Capital of Kazakhstan?`,options:["Astana","Tashkent","Baku","Tehran"],answer:0},
+
+{q:`Q320. If a²+b²=50 and ab=24 find a+b`,options:["10","8","12","6"],answer:0},
+
+{q:`Q321. Solve: 2x²-8=0`,options:["±2","2","-2","0"],answer:0},
+
+{q:`Q322. Assertion: Pressure increases with depth. Reason: Density affects pressure.`,options:["Both true & reason correct","Both true but reason wrong","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q323. Largest archipelago?`,options:["Indonesia","Japan","Philippines","Maldives"],answer:0},
+
+{q:`Q324. If x+1/x=6 find x²+1/x²`,options:["34","36","30","32"],answer:0},
+
+{q:`Q325. Unit of force?`,options:["Newton","Joule","Watt","Pascal"],answer:0},
+
+{q:`Q326. Assertion: Metals expand on heating. Reason: Kinetic energy increases.`,options:["Both true & reason correct","Both true but reason wrong","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q327. If cosθ=sinθ, θ=?`,options:["45°","30°","60°","90°"],answer:0},
+
+{q:`Q328. Which metal is liquid at room temp?`,options:["Mercury","Iron","Gold","Copper"],answer:0},
+
+{q:`Q329. Capital of Ethiopia?`,options:["Addis Ababa","Nairobi","Cairo","Khartoum"],answer:0},
+
+{q:`Q330. If x²-1/x²=0 find x`,options:["±1","1","-1","0"],answer:0},
+
+{q:`Q331. Solve: 3x²-27=0`,options:["±3","3","-3","0"],answer:0},
+
+{q:`Q332. Assertion: Energy is conserved. Reason: It cannot be created or destroyed.`,options:["Both true & reason correct","Both true but reason wrong","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q333. Largest lake?`,options:["Caspian","Superior","Victoria","Baikal"],answer:0},
+
+{q:`Q334. If a+b=7, ab=10 find a²+b²`,options:["29","25","30","28"],answer:0},
+
+{q:`Q335. Unit of power?`,options:["Watt","Joule","Volt","Ampere"],answer:0},
+
+{q:`Q336. Assertion: Reflection angle = incidence angle. Reason: Law of reflection.`,options:["Both true & reason correct","Both true but reason wrong","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q337. If tanθ=√3, θ=?`,options:["60°","30°","45°","90°"],answer:0},
+
+{q:`Q338. Which gas is inert?`,options:["Helium","Oxygen","Nitrogen","Hydrogen"],answer:0},
+
+{q:`Q339. Capital of Finland?`,options:["Helsinki","Oslo","Stockholm","Copenhagen"],answer:0},
+
+{q:`Q340. If x³=64 find x`,options:["4","8","2","16"],answer:0},
+
+{q:`Q341. Solve: x²-16=0`,options:["±4","4","-4","0"],answer:0},
+
+{q:`Q342. Assertion: Mass is constant. Reason: Law of conservation of mass.`,options:["Both true & reason correct","Both true but reason wrong","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q343. Largest desert?`,options:["Sahara","Gobi","Thar","Kalahari"],answer:0},
+
+{q:`Q344. If x+1/x=2 find x`,options:["1","2","-1","0"],answer:0},
+
+{q:`Q345. Unit of temperature?`,options:["Kelvin","Celsius","Fahrenheit","Joule"],answer:0},
+
+{q:`Q346. Assertion: Light bends in water. Reason: Change in speed.`,options:["Both true & reason correct","Both true but reason wrong","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q347. If sinθ=1, θ=?`,options:["90°","60°","30°","45°"],answer:0},
+
+{q:`Q348. Which gas is used in refrigeration?`,options:["Ammonia","Oxygen","Nitrogen","Hydrogen"],answer:0},
+
+{q:`Q349. Capital of Colombia?`,options:["Bogota","Lima","Quito","Caracas"],answer:0},
+
+{q:`Q350. If x²+2x+1=0 find x`,options:["-1","1","0","2"],answer:0},
+{q:`Q351. If x + 1/x = 3, find x⁵ + 1/x⁵`,options:["123","126","122","120"],answer:0},
+
+{q:`Q352. Assertion: Pressure is scalar. Reason: It acts in all directions equally.`,options:["Both true & correct","Both true but wrong reason","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q353. Case: A train travels 60 km/h for 2 hrs and 40 km/h for 3 hrs. Average speed?`,options:["48 km/h","50 km/h","52 km/h","46 km/h"],answer:0},
+
+{q:`Q354. If a+b=8, ab=15 find a³+b³`,options:["224","200","216","240"],answer:0},
+
+{q:`Q355. Unit of gravitational constant?`,options:["Nm²/kg²","N/kg","kg/m³","J/kg"],answer:0},
+
+{q:`Q356. Assertion: Metals conduct heat. Reason: Free electrons transfer energy.`,options:["Both true & correct","Both true but wrong reason","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q357. If sinθ=4/5 find tanθ`,options:["4/3","3/4","5/3","3/5"],answer:0},
+
+{q:`Q358. Case: A body falls from height. Velocity after 2s (g=10)?`,options:["20 m/s","10 m/s","30 m/s","15 m/s"],answer:0},
+
+{q:`Q359. Which country is called land of rising sun?`,options:["Japan","China","Korea","Thailand"],answer:0},
+
+{q:`Q360. If x² + y² = 34 and xy = 15, find x+y`,options:["7","9","8","6"],answer:0},
+
+{q:`Q361. Solve: |2x-3|=7`,options:["5,-2","4,-5","3,-3","6,-1"],answer:0},
+
+{q:`Q362. Assertion: Energy can convert form. Reason: Energy conserved.`,options:["Both true & correct","Both true but wrong reason","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q363. Case: Boat in river, speed in still water 10 km/h, stream 2 km/h → downstream speed?`,options:["12","8","10","14"],answer:0},
+
+{q:`Q364. If a+b+c=6 and ab+bc+ca=11 find a²+b²+c²`,options:["14","16","12","18"],answer:0},
+
+{q:`Q365. Unit of electric power?`,options:["Watt","Volt","Ohm","Ampere"],answer:0},
+
+{q:`Q366. Assertion: Light bends due to refraction. Reason: Speed changes.`,options:["Both true & correct","Both true but wrong reason","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q367. If cosθ=12/13 find sinθ`,options:["5/13","12/13","13/5","1/13"],answer:0},
+
+{q:`Q368. Case: A car accelerates from 0 to 20 m/s in 4s → acceleration?`,options:["5 m/s²","4","6","3"],answer:0},
+
+{q:`Q369. Largest democracy?`,options:["India","USA","Brazil","Indonesia"],answer:0},
+
+{q:`Q370. If x=√3+1 find 1/x`,options:["√3-1","1-√3","√3+1","2-√3"],answer:0},
+
+{q:`Q371. Solve: x²-9x+20=0`,options:["5,4","3,6","2,10","1,20"],answer:0},
+
+{q:`Q372. Assertion: Current produces magnetic field. Reason: Moving charges create field.`,options:["Both true & correct","Both true but wrong reason","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q373. Case: Work done lifting 10kg to 5m (g=10)?`,options:["500J","100J","50J","200J"],answer:0},
+
+{q:`Q374. If a-b=2 and ab=15 find a²+b²`,options:["34","30","32","28"],answer:0},
+
+{q:`Q375. Unit of density?`,options:["kg/m³","kg","m³","g"],answer:0},
+
+{q:`Q376. Assertion: Ice less dense than water. Reason: Molecules spaced.`,options:["Both true & correct","Both true but wrong reason","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q377. If tanθ=5/12 find secθ`,options:["13/12","12/13","5/13","13/5"],answer:0},
+
+{q:`Q378. Case: Distance=100m in 10s → speed?`,options:["10 m/s","5","20","15"],answer:0},
+
+{q:`Q379. Currency of China?`,options:["Yuan","Dollar","Yen","Won"],answer:0},
+
+{q:`Q380. If x²+1/x²=18 find x+1/x`,options:["√20","4","5","6"],answer:0},
+
+{q:`Q381. Solve: 3x²-3x=0`,options:["0,1","1,3","-1,3","2,3"],answer:0},
+
+{q:`Q382. Assertion: Sound needs medium. Reason: It is mechanical.`,options:["Both true & correct","Both true but wrong reason","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q383. Case: Power=Work/time → 100J in 10s → power?`,options:["10W","5","20","15"],answer:0},
+
+{q:`Q384. If a+b=10 and ab=16 find a²+b²`,options:["68","60","64","70"],answer:0},
+
+{q:`Q385. Unit of voltage?`,options:["Volt","Ampere","Ohm","Watt"],answer:0},
+
+{q:`Q386. Assertion: Metals expand. Reason: Atoms vibrate more.`,options:["Both true & correct","Both true but wrong reason","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q387. If sinθ=5/13 find cosθ`,options:["12/13","5/13","13/5","1/13"],answer:0},
+
+{q:`Q388. Case: Velocity 20→40 in 5s → acceleration?`,options:["4 m/s²","5","6","3"],answer:0},
+
+{q:`Q389. Largest ocean?`,options:["Pacific","Atlantic","Indian","Arctic"],answer:0},
+
+{q:`Q390. If x=2+√5 find 1/x`,options:["2-√5","√5-2","2+√5","5-2√5"],answer:0},
+
+{q:`Q391. Solve: x²-5x+6=0`,options:["2,3","1,6","-2,-3","3,5"],answer:0},
+
+{q:`Q392. Assertion: Gravity pulls objects. Reason: Mass attracts mass.`,options:["Both true & correct","Both true but wrong reason","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q393. Case: Force=mass×acceleration → 5kg,2m/s² → force?`,options:["10N","5","15","20"],answer:0},
+
+{q:`Q394. If a²+b²=29 and ab=10 find a+b`,options:["7","5","6","8"],answer:0},
+
+{q:`Q395. Unit of time?`,options:["Second","Minute","Hour","Day"],answer:0},
+
+{q:`Q396. Assertion: Light is EM wave. Reason: No medium needed.`,options:["Both true & correct","Both true but wrong reason","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q397. If tanθ=3/4 find sinθ`,options:["3/5","4/5","5/3","5/4"],answer:0},
+
+{q:`Q398. Case: Distance=vt → v=5, t=10 → distance?`,options:["50m","40","60","45"],answer:0},
+
+{q:`Q399. Capital of Australia?`,options:["Canberra","Sydney","Melbourne","Perth"],answer:0},
+
+{q:`Q400. If x²=49 find x`,options:["±7","7","-7","0"],answer:0},
+
+{q:`Q401. Solve: x(x-5)=0`,options:["0,5","1,5","2,5","3,5"],answer:0},
+
+{q:`Q402. Assertion: Heat flows hot to cold. Reason: Temperature difference.`,options:["Both true & correct","Both true but wrong reason","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q403. Case: Work=Fd → 10N,5m → work?`,options:["50J","40","60","45"],answer:0},
+
+{q:`Q404. If a+b=9, ab=20 find a²+b²`,options:["41","45","50","36"],answer:0},
+
+{q:`Q405. Unit of acceleration?`,options:["m/s²","m/s","m","s"],answer:0},
+
+{q:`Q406. Assertion: Refraction bends light. Reason: Speed changes.`,options:["Both true & correct","Both true but wrong reason","Assertion true, reason false","Both false"],answer:0},
+
+{q:`Q407. If cosθ=5/13 find sinθ`,options:["12/13","5/13","13/5","1/13"],answer:0},
+
+{q:`Q408. Case: Speed=distance/time → 100m in 20s`,options:["5 m/s","4","6","3"],answer:0},
+
+{q:`Q409. Largest country?`,options:["Russia","USA","China","India"],answer:0},
+
+{q:`Q410. If x²+4x+4=0 find x`,options:["-2","2","0","4"],answer:0},
+
+{q:`Q411. lim(x→0) (1 - cosx)/x² = ?`,options:["0","1/2","1","2"],answer:1},
+
+{q:`Q412. If x²+y²=25 and xy=12, find x+y`,options:["7","5","13","-7"],answer:0},
+
+{q:`Q413. ∫ x dx = ?`,options:["x²/2","x²","2x","lnx"],answer:0},
+
+{q:`Q414. If log₂ x = 5, x=?`,options:["32","16","64","25"],answer:0},
+
+{q:`Q415. d/dx (ln x) = ?`,options:["1/x","x","lnx","0"],answer:0},
+
+{q:`Q416. If a+b=10, ab=21 → a²+b²=?`,options:["58","100","79","121"],answer:0},
+
+{q:`Q417. Roots of x²+4=0`,options:["±2i","±4i","±i","0"],answer:0},
+
+{q:`Q418. Sum of first n natural numbers`,options:["n(n+1)/2","n²","n(n-1)/2","2n"],answer:0},
+
+{q:`Q419. If sinθ=1, θ=?`,options:["90°","0°","180°","45°"],answer:0},
+
+{q:`Q420. det[[2,3],[1,4]]=?`,options:["5","8","7","6"],answer:0},
+
+/* ===================== PHYSICS ===================== */
+
+{q:`Q421. SI unit of energy?`,options:["Joule","Watt","Newton","Volt"],answer:0},
+
+{q:`Q422. Velocity-time graph slope gives?`,options:["Acceleration","Velocity","Distance","Force"],answer:0},
+
+{q:`Q423. F=ma, if m doubles → F?`,options:["Double","Half","Same","Zero"],answer:0},
+
+{q:`Q424. Work = ?`,options:["F×d","F/d","d/F","Fd²"],answer:0},
+
+{q:`Q425. Unit of frequency?`,options:["Hz","m/s","J","kg"],answer:0},
+
+{q:`Q426. Kinetic energy = ?`,options:["½mv²","mv","mgh","Fv"],answer:0},
+
+{q:`Q427. Speed of light?`,options:["3×10^8","10^6","10^5","10^7"],answer:0},
+
+{q:`Q428. Power = ?`,options:["W/t","Wt","t/W","F×d"],answer:0},
+
+{q:`Q429. Pressure = ?`,options:["F/A","A/F","FA","F²"],answer:0},
+
+{q:`Q430. Unit of force?`,options:["Newton","Joule","Watt","Pascal"],answer:0},
+
+/* ===================== CHEMISTRY ===================== */
+
+{q:`Q431. Atomic number of Oxygen?`,options:["8","16","12","6"],answer:0},
+
+{q:`Q432. pH of neutral solution?`,options:["7","0","14","1"],answer:0},
+
+{q:`Q433. NaCl type bond?`,options:["Ionic","Covalent","Metallic","Hydrogen"],answer:0},
+
+{q:`Q434. H₂SO₄ is?`,options:["Acid","Base","Salt","Metal"],answer:0},
+
+{q:`Q435. Electron charge?`,options:["-1","+1","0","2"],answer:0},
+
+{q:`Q436. Periodic table rows?`,options:["Periods","Groups","Blocks","Shells"],answer:0},
+
+{q:`Q437. Valency of Carbon?`,options:["4","2","1","3"],answer:0},
+
+{q:`Q438. Gas constant symbol?`,options:["R","K","G","H"],answer:0},
+
+{q:`Q439. Water boiling point?`,options:["100°C","0°C","50°C","200°C"],answer:0},
+
+{q:`Q440. Mole concept unit?`,options:["6.022×10^23","10^23","10^22","1"],answer:0},
+
+/* ===================== GK (SHORT TRICK HARD) ===================== */
+
+{q:`Q441. Capital of India?`,options:["Delhi","Mumbai","Kolkata","Chennai"],answer:0},
+
+{q:`Q442. President appoints?`,options:["PM","CM","Judge","All"],answer:3},
+
+{q:`Q443. Largest ocean?`,options:["Pacific","Atlantic","Indian","Arctic"],answer:0},
+
+{q:`Q444. Currency of USA?`,options:["Dollar","Euro","Yen","Rupee"],answer:0},
+
+{q:`Q445. ISRO stands for?`,options:["Indian Space Research Org","Space India","Rocket Org","None"],answer:0},
+
+{q:`Q446. UN HQ?`,options:["New York","Geneva","Paris","London"],answer:0},
+
+{q:`Q447. Largest continent?`,options:["Asia","Africa","Europe","Australia"],answer:0},
+
+{q:`Q448. National animal India?`,options:["Tiger","Lion","Elephant","Cow"],answer:0},
+
+{q:`Q449. RBI controls?`,options:["Money","Army","Rail","Police"],answer:0},
+
+{q:`Q450. First PM India?`,options:["Nehru","Gandhi","Patel","Rajendra"],answer:0},
+
+/* ===================== EXTREME MIX ===================== */
+
+{q:`Q451. sin²θ+cos²θ=?`,options:["1","0","2","θ"],answer:0},
+
+{q:`Q452. Light speed medium?`,options:["Vacuum","Water","Air","Glass"],answer:0},
+
+{q:`Q453. Strongest force?`,options:["Nuclear","Grav","EM","Weak"],answer:0},
+
+{q:`Q454. Proton charge?`,options:["+1","-1","0","2"],answer:0},
+
+{q:`Q455. Unit of current?`,options:["Ampere","Volt","Ohm","Watt"],answer:0},
+
+{q:`Q456. Avogadro number?`,options:["6.022×10^23","10^23","10^22","10^21"],answer:0},
+
+{q:`Q457. Joule is unit of?`,options:["Energy","Power","Force","Pressure"],answer:0},
+
+{q:`Q458. Largest planet?`,options:["Jupiter","Earth","Mars","Venus"],answer:0},
+
+{q:`Q459. Density = ?`,options:["m/V","V/m","mV","V²"],answer:0},
+
+{q:`Q460. Acceleration due to gravity?`,options:["9.8","10","8","9"],answer:0},
 ];
 
-let score = 0;
-let answered = 0;
+// Start from Flask score
+let score = {{ score }};
+let current = 0;
+let answered = false;
+
+// Load saved progress
+if(localStorage.getItem("current")){
+    current = parseInt(localStorage.getItem("current"));
+}
+if(localStorage.getItem("score")){
+    score = parseInt(localStorage.getItem("score"));
+}
 
 const quiz = document.getElementById("quiz");
+const scoreBox = document.getElementById("score");
 
-questions.forEach((item,i)=>{
-let div = document.createElement("div");
-div.className="question";
+// 🎯 Load question
+function loadQuestion(){
+    answered = false;
+    let q = questions[current];
 
-let html = `<b>${item.q}</b>`;
+    quiz.innerHTML = `
+        <div class="question">
+            <h3>Question ${current+1} / ${questions.length}</h3>
+            <p>${q.q}</p>
 
-item.options.forEach((opt,j)=>{
-html += `<div class="option" onclick="check(this,${i},${j})">${opt}</div>`;
-});
+            ${q.options.map((opt,i)=>`
+                <label class="option">
+                    <input type="radio" name="option" value="${i}">
+                    ${opt}
+                </label>
+            `).join("")}
 
-html += `<div id="res-${i}"></div>`;
-div.innerHTML = html;
-quiz.appendChild(div);
-});
+            <button onclick="submitAnswer()">Submit Answer</button>
 
-function check(el,q,sel){
-let correct = questions[q].answer;
-let opts = el.parentElement.querySelectorAll(".option");
-let res = document.getElementById("res-"+q);
+            <div id="result" style="margin-top:10px;font-weight:bold;"></div>
 
-if(res.innerHTML!=="") return;
+            <div style="margin-top:15px;">
+                <button onclick="prev()">⬅ Prev</button>
+                <button onclick="next()">Next ➡</button>
+            </div>
+        </div>
+    `;
 
-answered++;
-
-if(sel===correct){
-el.classList.add("correct");
-res.innerHTML="✅ Correct / सही";
-score++;
-}else{
-el.classList.add("wrong");
-opts[correct].classList.add("correct");
-res.innerHTML="❌ Wrong / गलत";
+    scoreBox.innerHTML = `Score: ${score}`;
+document.getElementById("progress").style.width =
+((current+1)/questions.length)*100 + "%";
 }
 
-document.getElementById("score").innerHTML =
-`Score: ${score} / ${answered}`;
+// 🎯 Submit Answer
+function submitAnswer(){
+    if(answered) return;
+
+    let selected = document.querySelector('input[name="option"]:checked');
+    if(!selected){
+        alert("Please select an option");
+        return;
+    }
+
+    let selectedVal = parseInt(selected.value);
+    let correct = questions[current].answer;
+    let options = document.querySelectorAll(".option");
+    let resultBox = document.getElementById("result");
+
+    answered = true;
+
+    if(selectedVal === correct){
+        options[selectedVal].classList.add("correct");
+        resultBox.innerHTML = "✅ Correct";
+        score++;
+    } else {
+        options[selectedVal].classList.add("wrong");
+        options[correct].classList.add("correct");
+        resultBox.innerHTML = "❌ Wrong";
+    }
+
+    localStorage.setItem("score", score);
+    localStorage.setItem("current", current);
+
+    scoreBox.innerHTML = `Score: ${score}`;
+
+    // auto next after 1 sec
+    setTimeout(() => {
+        next();
+    }, 1000);
 }
+
+// 🎯 Next
+function next(){
+    if(current < questions.length - 1){
+        current++;
+        localStorage.setItem("current", current);
+        loadQuestion();
+    } else {
+        finish();
+    }
+}
+
+// 🎯 Previous
+function prev(){
+    if(current > 0){
+        current--;
+        localStorage.setItem("current", current);
+        loadQuestion();
+    }
+}
+
+// 🎯 Jump to question
+function jumpTo(){
+    let val = document.getElementById("jump").value;
+    if(val >= 1 && val <= questions.length){
+        current = val - 1;
+        loadQuestion();
+    }
+}
+
+// 🎯 Finish
+function finish(){
+    quiz.innerHTML = `
+        <h2 style="color:white;text-align:center;">🎉 Quiz Completed</h2>
+        <h3 style="color:white;text-align:center;">Your Score: ${score} / ${questions.length}</h3>
+        <div style="text-align:center;">
+            <button onclick="restart()">Restart</button>
+        </div>
+    `;
+
+    navigator.sendBeacon("/update_score", new URLSearchParams({
+        score: score
+    }));
+
+    localStorage.clear();
+}
+
+// 🎯 Restart
+function restart(){
+    score = 0;
+    current = 0;
+    localStorage.clear();
+    loadQuestion();
+}
+
+// Start
+loadQuestion();
 
 </script>
 

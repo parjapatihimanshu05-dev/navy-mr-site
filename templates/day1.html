@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Agniveer Full Quiz</title>
+
+<style>
+body { font-family: Arial; background:#eef; padding:20px; }
+h1 { text-align:center; }
+
+.question {
+    background:white;
+    padding:12px;
+    margin:10px;
+    border-radius:8px;
+}
+
+.option {
+    padding:6px;
+    margin:5px;
+    border:1px solid #ccc;
+    cursor:pointer;
+}
+
+.correct { background:lightgreen; }
+.wrong { background:salmon; }
+
+#score {
+    text-align:center;
+    font-size:20px;
+    margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🇮🇳 Agniveer MR Full Quiz (Hindi + English)</h1>
+
+<div id="quiz"></div>
+<div id="score"></div>
+
+<script>
+
+const questions = [
+
+{q:`Q1. भारत की राजधानी क्या है?<br>What is the capital of India?`,options:["Mumbai","Delhi","Kolkata","Chennai"],answer:1},
+{q:`Q2. 2 + 2 = ?<br>2 + 2 = ?`,options:["3","4","5","6"],answer:1},
+{q:`Q3. पृथ्वी किसके चारों ओर घूमती है?<br>Earth revolves around?`,options:["Moon","Sun","Mars","Venus"],answer:1},
+{q:`Q4. जल का सूत्र क्या है?<br>Formula of water?`,options:["H2O","CO2","O2","H2"],answer:0},
+{q:`Q5. बल की इकाई क्या है?<br>Unit of force?`,options:["Newton","Joule","Watt","Pascal"],answer:0},
+
+{q:`Q6. सूर्य क्या है?<br>What is Sun?`,options:["Planet","Star","Satellite","Comet"],answer:1},
+{q:`Q7. मानव हृदय में कितने कक्ष होते हैं?<br>Heart chambers?`,options:["2","3","4","5"],answer:2},
+{q:`Q8. pH 7 क्या दर्शाता है?<br>pH 7 indicates?`,options:["Acid","Base","Neutral","Salt"],answer:2},
+{q:`Q9. प्रकाश की गति क्या है?<br>Speed of light?`,options:["3×10^8","10^6","10^5","10^7"],answer:0},
+{q:`Q10. ऑक्सीजन का प्रतीक?<br>Symbol of oxygen?`,options:["O","Ox","Og","On"],answer:0},
+
+{q:`Q11. 5×5=?<br>5×5=?`,options:["20","25","30","15"],answer:1},
+{q:`Q12. वर्ग का क्षेत्रफल?<br>Area of square?`,options:["a²","2a","a³","√a"],answer:0},
+{q:`Q13. 10% of 200?<br>10% of 200?`,options:["10","20","30","40"],answer:1},
+{q:`Q14. sin 90°?<br>sin 90°?`,options:["1","0","-1","½"],answer:0},
+{q:`Q15. cos 0°?<br>cos 0°?`,options:["1","0","-1","½"],answer:0},
+
+{q:`Q16. भारत का राष्ट्रीय पशु?<br>National animal?`,options:["Lion","Tiger","Cow","Elephant"],answer:1},
+{q:`Q17. पृथ्वी का उपग्रह?<br>Satellite of Earth?`,options:["Moon","Sun","Mars","Venus"],answer:0},
+{q:`Q18. Na किसका प्रतीक है?<br>Na is symbol of?`,options:["Sodium","Sulfur","Nitrogen","Neon"],answer:0},
+{q:`Q19. CO2 क्या है?<br>CO2 is?`,options:["Gas","Liquid","Solid","Metal"],answer:0},
+{q:`Q20. पौधे भोजन कैसे बनाते हैं?<br>Plants make food by?`,options:["Photosynthesis","Respiration","Digestion","None"],answer:0},
+
+{q:`Q21. 12/4=?<br>12/4=?`,options:["2","3","4","6"],answer:1},
+{q:`Q22. 7²=?<br>7²=?`,options:["49","14","21","28"],answer:0},
+{q:`Q23. त्रिभुज के कोणों का योग?<br>Sum of triangle angles?`,options:["180","90","360","270"],answer:0},
+{q:`Q24. वृत्त की परिधि?<br>Circumference?`,options:["2πr","πr²","r²","2r"],answer:0},
+{q:`Q25. tan 45°?<br>tan 45°?`,options:["1","0","√3","½"],answer:0},
+
+{q:`Q26. रक्त का रंग?<br>Color of blood?`,options:["Red","Blue","Green","Yellow"],answer:0},
+{q:`Q27. विटामिन C स्रोत?<br>Vitamin C source?`,options:["Orange","Rice","Milk","Bread"],answer:0},
+{q:`Q28. लोहा की कमी?<br>Iron deficiency?`,options:["Anemia","Rickets","Scurvy","None"],answer:0},
+{q:`Q29. बिजली की इकाई?<br>Unit of current?`,options:["Ampere","Volt","Ohm","Watt"],answer:0},
+{q:`Q30. प्रतिरोध की इकाई?<br>Unit of resistance?`,options:["Ohm","Volt","Ampere","Watt"],answer:0},
+
+{q:`Q31. 9×9=?<br>9×9=?`,options:["81","72","99","90"],answer:0},
+{q:`Q32. √16=?<br>√16=?`,options:["4","8","2","6"],answer:0},
+{q:`Q33. वर्गमूल?<br>Square root?`,options:["Root","Power","None","Sum"],answer:0},
+{q:`Q34. रेखाएं समानांतर?<br>Parallel lines?`,options:["Never meet","Meet","Cross","None"],answer:0},
+{q:`Q35. sin 30°?<br>sin 30°?`,options:["1/2","1","0","√3"],answer:0},
+
+{q:`Q36. सूर्य से सबसे पास ग्रह?<br>Closest planet?`,options:["Mercury","Venus","Earth","Mars"],answer:0},
+{q:`Q37. सबसे बड़ा ग्रह?<br>Largest planet?`,options:["Jupiter","Earth","Mars","Saturn"],answer:0},
+{q:`Q38. पानी का क्वथनांक?<br>Boiling point?`,options:["100°C","0°C","50°C","200°C"],answer:0},
+{q:`Q39. ठोस से द्रव?<br>Solid to liquid?`,options:["Melting","Freezing","Condensation","Evaporation"],answer:0},
+{q:`Q40. द्रव से गैस?<br>Liquid to gas?`,options:["Evaporation","Melting","Freezing","Condensation"],answer:0},
+
+{q:`Q41. 15+5=?<br>15+5=?`,options:["20","25","30","15"],answer:0},
+{q:`Q42. 100/10=?<br>100/10=?`,options:["10","20","5","25"],answer:0},
+{q:`Q43. आयत का क्षेत्रफल?<br>Rectangle area?`,options:["l×b","l+b","2l","l²"],answer:0},
+{q:`Q44. sin²+cos²=?<br>Identity?`,options:["1","0","2","θ"],answer:0},
+{q:`Q45. sec θ=?<br>sec θ=?`,options:["1/cos","1/sin","tan","sin"],answer:0},
+
+{q:`Q46. श्वसन में गैस?<br>Breathing gas?`,options:["Oxygen","CO2","Nitrogen","Hydrogen"],answer:0},
+{q:`Q47. मस्तिष्क का भाग?<br>Brain part?`,options:["Cerebrum","Heart","Lung","Kidney"],answer:0},
+{q:`Q48. बैटरी क्या देती है?<br>Battery gives?`,options:["Energy","Light","Sound","Heat"],answer:0},
+{q:`Q49. दर्पण में प्रतिबिंब?<br>Reflection?`,options:["Equal angle","Random","None","Different"],answer:0},
+{q:`Q50. इंद्रधनुष क्यों बनता है?<br>Rainbow due to?`,options:["Refraction","Reflection","None","Diffraction"],answer:0},
+{
+q:`Q51. 10 आदमी एक दीवार को 8 दिन में बना सकते है। आधे दिन में कितने आदमी?<br>
+10 men can build a wall in 8 days. How many men are required to complete it in half day?`,
+options:["80","100","120","160"],
+answer:3
+},
+
+{
+q:`Q52. 20% और 5% छूट पर खरीदी गई वस्तु (₹25000), ₹2000 मरम्मत, ₹25000 में बिक्री। लाभ/हानि %?<br>
+A dealer buys an article at ₹25000 with 20% and 5% discount, spends ₹2000 and sells at ₹25000. Gain/Loss %?`,
+options:["21% loss","10.5% loss","19.5% gain","25% gain"],
+answer:0
+},
+
+{
+q:`Q53. 1000kg चीनी, कुछ 8% लाभ पर, बाकी 18% पर। कुल लाभ 14%। 18% पर बिकी मात्रा?<br>
+A merchant sells part sugar at 8% and rest at 18%, overall 14% gain. Quantity at 18%?`,
+options:["500kg","600kg","400kg","640kg"],
+answer:1
+},
+
+{
+q:`Q54. माध्य ज्ञात करें: 28,24,37,42,56,59,67,28,15,32<br>
+Find mean`,
+options:["23.5","38.8","42.3","71.2"],
+answer:1
+},
+
+{
+q:`Q55. x² - 8x + 15 = 0 के मूल?<br>
+Roots of equation`,
+options:["2,3","3,5","8,15","6,5"],
+answer:1
+},
+
+{
+q:`Q56. समद्विबाहु त्रिभुज (3:4), क्षेत्रफल 18√5। तीसरी भुजा?<br>
+Isosceles triangle side ratio 3:4, area 18√5. Third side?`,
+options:["8√2","12","16","5√10"],
+answer:2
+},
+
+{
+q:`Q57. शंकु (r=7,h=24) की 5 टोपियों का क्षेत्रफल?<br>
+Area of sheet for 5 cones`,
+options:["5000","2750","3000","2700"],
+answer:1
+},
+
+{
+q:`Q58. cos²x + sec²x का न्यूनतम मान?<br>
+Minimum value`,
+options:["0","1","2","3"],
+answer:2
+},
+
+{
+q:`Q59. 2 साड़ी + 4 शर्ट = 16000, 1 साड़ी = 6 शर्ट। 12 शर्ट की कीमत?<br>
+Cost of 12 shirts`,
+options:["12000","24000","48000","None"],
+answer:1
+},
+
+{
+q:`Q60. k के लिए अनंत हल?<br>
+kx+3y-k+3=0 and 12x+ky=k`,
+options:["0","-6","6","1"],
+answer:2
+},
+
+{
+q:`Q61. मान ज्ञात करें<br>
+Evaluate expression`,
+options:["16x+2y","16x²-y⁴","20x+y²","16x-4y"],
+answer:3
+},
+
+{
+q:`Q62. यदि a²+b²=234, ab=108, तो (a+b)/(a-b)?`,
+options:["10","8","5","4"],
+answer:1
+},
+
+{
+q:`Q63. Solve: 256 ÷ 17 × 3 + 180`,
+options:["51","73","271","272"],
+answer:3
+},
+
+{
+q:`Q64. सौर सेल में किसका प्रयोग नहीं होता?<br>
+Which can't be used in solar cell?`,
+options:["Silicon","Platinum","Gallium","Germanium"],
+answer:1
+},
+
+{
+q:`Q65. ध्वनि की तीव्रता निर्भर करती है?<br>
+Loudness depends on`,
+options:["Wire","Amplitude","Area","All"],
+answer:3
+},
+
+{
+q:`Q66. विद्युत आवेश की SI इकाई?<br>
+SI unit of charge`,
+options:["Volt","Ampere","Coulomb","Tesla"],
+answer:2
+},
+
+{
+q:`Q67. Fructose → Ethanol enzyme?`,
+options:["Zymase","Invertase","Diastase","Fructose"],
+answer:0
+},
+
+{
+q:`Q68. वेग का माप?<br>
+Measure of velocity`,
+options:["30 s","30 South","30 m/s","30 m/s South"],
+answer:3
+},
+
+{
+q:`Q69. थर्मस हिलाने पर तापमान?<br>
+Thermos shaken`,
+options:["Increase","Decrease","Same","Can't say"],
+answer:0
+},
+
+{
+q:`Q70. क्या पृथ्वी चंद्रमा पर कार्य करती है?<br>
+Does Earth do work on Moon?`,
+options:["No","Yes sometimes","Yes always","Can't say"],
+answer:0
+},
+
+{
+q:`Q71. ऊपर जाने वाली वस्तु?<br>
+Upward motion`,
+options:["Accelerated","Constant","Oscillation","Retarded"],
+answer:3
+},
+
+{
+q:`Q72. भार शून्य नहीं होगा?<br>
+Weight not zero`,
+options:["Earth centre","Free fall","Space","Frictionless surface"],
+answer:3
+},
+
+{
+q:`Q73. 10^19 इलेक्ट्रॉन हटाने पर आवेश?`,
+options:["10^19","+1.6","-1.6","10^-19"],
+answer:1
+},
+
+{
+q:`Q74. क्वासार क्या है?<br>
+Quasar is`,
+options:["Neutron star","Black hole","White dwarf","Radio source"],
+answer:3
+},
+
+{
+q:`Q75. ठोस → गैस?<br>
+Solid to gas`,
+options:["Sublimation","Evaporation","Diffusion","Condensation"],
+answer:0
+}
+,
+
+{
+q:`Q76. सबसे बड़ा ग्रह कौन सा है ?<br>Which is the biggest planet?`,
+options:["Venus","Mars","Mercury","Jupiter"],
+answer:3
+},
+
+{
+q:`Q77. ऋग्वेद काल में किसकी पूजा होती थी?<br>Who was mainly worshipped in the Rig Veda period?`,
+options:["Indra","Vishnu","Surya","Trimurti"],
+answer:0
+},
+
+{
+q:`Q78. एलोरा का महान स्थल किस देवता को समर्पित है?<br>Ellora monument is dedicated to?`,
+options:["Vishnu","Shiva","Ganesh","Krishna"],
+answer:1
+},
+
+{
+q:`Q79. भारतीय राष्ट्रीय कांग्रेस की स्थापना कब हुई?<br>Year of INC formation`,
+options:["1835","1885","1901","1875"],
+answer:1
+},
+
+{
+q:`Q80. राष्ट्रीय राजमार्ग 4 जोड़ता है?<br>NH4 connects`,
+options:["Mumbai-Nagpur","Mumbai-Chennai","Nagpur-Hyderabad","Bangalore-Mysore"],
+answer:1
+},
+
+{
+q:`Q81. पहली इलेक्ट्रिक ट्रेन (Deccan Queen) चली?<br>First electric train route`,
+options:["Mumbai-Surat","Howrah-Delhi","Kalyan-Pune","Delhi-Chennai"],
+answer:2
+},
+
+{
+q:`Q82. ललित कला अकादमी का मुख्यालय?<br>Headquarters`,
+options:["New Delhi","Chandigarh","Pune","Kolkata"],
+answer:0
+},
+
+{
+q:`Q83. सिंधु घाटी स्थल पाकिस्तान में?<br>Indus site in Pakistan`,
+options:["Harappa","Kalibangan","Lothal","Alamgir"],
+answer:0
+},
+
+{
+q:`Q84. फिलिस्तीन विद्रोह क्या कहलाता है?<br>Palestinian uprising`,
+options:["Intifada","Hezbollah","PLO","Hamas"],
+answer:0
+},
+
+{
+q:`Q85. 'Runs and Ruins' किसने लिखी?<br>Author`,
+options:["Kapil Dev","Imran Khan","Sunil Gavaskar","None"],
+answer:1
+},
+
+{
+q:`Q86. मधुमेह किसकी कमी से होता है?<br>Diabetes caused by lack of`,
+options:["Sugar","Insulin","Calcium","Vitamins"],
+answer:1
+},
+
+{
+q:`Q87. 'Land of Midnight Sun' कौन सा देश?<br>Country`,
+options:["Japan","Sweden","Norway","Denmark"],
+answer:2
+},
+
+{
+q:`Q88. अक्रिय गैस की खोज?<br>Inert gas discovery`,
+options:["Priestley","Lavoisier","Cavendish","Ramsay"],
+answer:3
+},
+
+{
+q:`Q89. इलेक्ट्रिक आयरन का तत्व?<br>Heating element`,
+options:["Nichrome","Tungsten","Copper","Iron"],
+answer:0
+},
+
+{
+q:`Q90. मणिपुर की राजधानी?<br>Capital`,
+options:["Shillong","Imphal","Gangtok","Kohima"],
+answer:1
+},
+
+{
+q:`Q91. अंडमान-निकोबार की राजधानी?<br>Capital`,
+options:["Havelock","Jollyboy","Port Blair","Ross"],
+answer:2
+},
+
+{
+q:`Q92. FAO का पूरा नाम?<br>FAO stands for`,
+options:["Food and Agriculture Organisation","Fruits Agro Org","Fruit Agriculture Ocean","Fruits Agro Ocean"],
+answer:0
+},
+
+{
+q:`Q93. तेनजिंग नोर्गे किस क्षेत्र में प्रसिद्ध?<br>Tenzing Norgay`,
+options:["Boxing","Cycling","Mountaineering","Hockey"],
+answer:2
+},
+
+{
+q:`Q94. 'Fuehrer' किसे कहा जाता है?<br>Who is Fuehrer`,
+options:["Stalin","Lenin","Hitler","Bismarck"],
+answer:2
+},
+
+{
+q:`Q95. भारत का सबसे बड़ा संग्रहालय?<br>Largest museum`,
+options:["Andhra","UP","West Bengal","Delhi"],
+answer:2
+},
+
+{
+q:`Q96. सबसे लंबा महाकाव्य?<br>Longest epic`,
+options:["Gita","Ramayan","Gita Govinda","Mahabharat"],
+answer:3
+},
+
+{
+q:`Q97. Derby किस खेल से जुड़ा है?<br>Derby related to`,
+options:["Polo","Swimming","Racing","Horse riding"],
+answer:3
+},
+
+{
+q:`Q98. गीता सेठी किस खेल से जुड़ी है?<br>Geet Sethi`,
+options:["Basketball","Chess","Snooker","Tennis"],
+answer:2
+},
+
+{
+q:`Q99. पहला भारतीय ग्रैंडमास्टर?<br>First Indian GM`,
+options:["Anupama","Bhagyashree","Vishwanathan Anand","DV Prasad"],
+answer:2
+},
+
+{
+q:`Q100. पोलो खेल की उत्पत्ति भारत में कहाँ हुई?<br>Polo originated in`,
+options:["Manipur","Rajasthan","Gujarat","West Bengal"],
+answer:0
+}
+];
+
+let score = 0;
+let answered = 0;
+
+const quiz = document.getElementById("quiz");
+
+questions.forEach((item,i)=>{
+let div = document.createElement("div");
+div.className="question";
+
+let html = `<b>${item.q}</b>`;
+
+item.options.forEach((opt,j)=>{
+html += `<div class="option" onclick="check(this,${i},${j})">${opt}</div>`;
+});
+
+html += `<div id="res-${i}"></div>`;
+div.innerHTML = html;
+quiz.appendChild(div);
+});
+
+function check(el,q,sel){
+let correct = questions[q].answer;
+let opts = el.parentElement.querySelectorAll(".option");
+let res = document.getElementById("res-"+q);
+
+if(res.innerHTML!=="") return;
+
+answered++;
+
+if(sel===correct){
+el.classList.add("correct");
+res.innerHTML="✅ Correct / सही";
+score++;
+}else{
+el.classList.add("wrong");
+opts[correct].classList.add("correct");
+res.innerHTML="❌ Wrong / गलत";
+}
+
+document.getElementById("score").innerHTML =
+`Score: ${score} / ${answered}`;
+}
+
+</script>
+
+</body>
+</html>
